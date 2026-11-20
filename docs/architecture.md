@@ -28,22 +28,18 @@ OctoFit Tracker is a three-tier application for a school fitness program. The st
 
 ## Implementation decisions
 
-Record your plan here before editing code.
-
-- Presentation tier decision:
-- Logic tier decision:
-- Data tier decision:
-- Activity tracking approach:
-- Team management approach:
-- Leaderboard approach:
-- Workout suggestions approach:
+- Presentation tier decision: Keep page components responsible for rendering and user interaction. Use the shared API client with relative `/api` paths, and expose loading, empty, and error states accessibly.
+- Logic tier decision: Keep Express route handlers thin and implement feature behavior in `octofitService.ts`. Validate inputs and referenced records before writes, and return deliberate 4xx errors through the existing error middleware.
+- Data tier decision: Put required fields, types, defaults, and references in the Mongoose models. Keep seed data representative and idempotent without deleting unrelated existing records.
+- Activity tracking approach: Validate `userId`, `teamId`, activity type, and positive minutes; verify both referenced records exist; then persist their IDs, the submitted activity details, computed points, and a creation timestamp. Keep point calculation in the service so it is consistent.
+- Team management approach: Require a non-empty name, preserve the submitted name and mascot, and store member references. Default omitted members to an empty array.
+- Leaderboard approach: Aggregate activity points by team, sort from highest total to lowest, and return each team's name, total, and 1-based rank.
+- Workout suggestions approach: Find the user by email, use the user's fitness goal and recent activity to select a matching workout, and include a reason. Return a deliberate 4xx response when no user matches.
 
 ## Test plan
 
-Record the commands you run and what each failure means.
-
-- Data-tier command: `npm run test:data --prefix octofit-tracker/backend`
-- API command: `npm run test:api --prefix octofit-tracker/backend`
-- Frontend command: `npm test --prefix octofit-tracker/frontend`
-- Backend build command: `npm run build --prefix octofit-tracker/backend`
-- Frontend build command: `npm run build --prefix octofit-tracker/frontend`
+- Data tier: `npm run test:data --prefix octofit-tracker/backend` — run; baseline is 4 failures and 1 pass. Failures indicate missing required-field validation in the User, Team, Activity, and Workout schemas.
+- API: `npm run test:api --prefix octofit-tracker/backend` — run; baseline is 4 failures. Invalid activity and team requests return `501` instead of `400`, the leaderboard is empty, and the first workout suggestion does not match the user's activity pattern.
+- Presentation: `npm test --prefix octofit-tracker/frontend` — run; baseline is 15 failures. Failures cover expected API-driven content/request behavior and the loading, empty, and accessible error states.
+- Backend build: `npm run build --prefix octofit-tracker/backend` — run after the contract tests pass; a failure indicates backend TypeScript/build errors.
+- Frontend build: `npm run build --prefix octofit-tracker/frontend` — run after the contract tests pass; a failure indicates frontend production-build errors.
