@@ -1,3 +1,4 @@
+import { getJson } from '../api/client.js';
 import { useApiResource } from '../api/useApiResource.js';
 
 type WorkoutSuggestion = {
@@ -13,6 +14,7 @@ export default function Workouts() {
   const userEmail = encodeURIComponent('mona@example.com');
   const { data, loading, error } = useApiResource<WorkoutSuggestionsResponse>(
     `/api/workouts/suggestions/${userEmail}`,
+    getJson<WorkoutSuggestionsResponse>,
   );
 
   return (

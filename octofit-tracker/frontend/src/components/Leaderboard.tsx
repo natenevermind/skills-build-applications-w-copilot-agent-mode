@@ -1,10 +1,14 @@
+import { getJson } from '../api/client.js';
 import { useApiResource } from '../api/useApiResource.js';
 
 type LeaderboardEntry = { teamName: string; totalPoints: number; rank: number };
 type LeaderboardResponse = { leaderboard: LeaderboardEntry[] };
 
 export default function Leaderboard() {
-  const { data, loading, error } = useApiResource<LeaderboardResponse>('/api/leaderboard');
+  const { data, loading, error } = useApiResource<LeaderboardResponse>(
+    '/api/leaderboard',
+    getJson<LeaderboardResponse>,
+  );
 
   return (
     <section className="card">
